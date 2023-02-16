@@ -28,7 +28,8 @@ jobs:
      steps:
        - run: echo “hello” > hello.txt
        - uses: actions/upload-artifact@v3
-         
+         with:
+           path: hello.txt
 
   prod:
     runs-on: ubuntu-20.04
