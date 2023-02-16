@@ -18,7 +18,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-20.04
-    continue-on-error: true
+    continue-on-error: false
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
