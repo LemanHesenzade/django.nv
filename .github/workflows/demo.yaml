@@ -41,30 +41,30 @@ jobs:
           pip install -r requirements.txt
           python manage.py test taskManager
 
-  oast-frontend:
+  odc-backend:
     runs-on: ubuntu-20.04
-    needs: test
+    name: depecheck_test
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
         with:
-          node-version: '10.x'
+          project: 'webgoat'
+          path: '.'
+          format: 'CSV'
 
-      - run: npm install
-
-      - run: docker run --rm -v $(pwd):/src -w /src hysnsec/retire --outputformat json --outputpath retirejs-report.json --severity high
-        continue-on-error: true
-
-      - uses: actions/upload-artifact@v2
+      - name: Upload Test results
+        uses: actions/upload-artifact@master
         with:
-          name: RetireJS
-          path: retirejs-report.json
-        if: always()                        # what is this for?
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
 
   integration:
     runs-on: ubuntu-20.04
-    needs: oast-frontend
+    needs: odc-backend
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
