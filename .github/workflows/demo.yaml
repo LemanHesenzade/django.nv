@@ -41,30 +41,38 @@ jobs:
           pip install -r requirements.txt
           python manage.py test taskManager
 
-  odc-backend:
+ 
+  oast-snyk:
     runs-on: ubuntu-20.04
-    name: depecheck_test
+    needs: test
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Depcheck
-        uses: dependency-check/Dependency-Check_Action@main
-        id: Depcheck
+      - uses: actions/checkout@master      
+      - uses: snyk/actions/setup@master
+      - uses: actions/setup-go@v1
         with:
-          project: 'webgoat'
-          path: '.'
-          format: 'CSV'
+          go-version: "1.13"
 
-      - name: Upload Test results
-        uses: actions/upload-artifact@master
+      - uses: actions/setup-node@v2
         with:
-           name: Depcheck report
-           path: ${{github.workspace}}/reports
+          node-version: '10.x'
+
+      - name: Install Node modules
+        run: npm install
+
+      - name: Run Snyk
+        run: snyk test --json > snyk-results.json
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Snyk               
+          path: snyk-results.json
+        if: always()        # what is this for? 
 
   integration:
     runs-on: ubuntu-20.04
-    needs: odc-backend
+    needs: oast-snyk
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
