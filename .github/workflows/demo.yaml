@@ -40,32 +40,27 @@ jobs:
           source env/bin/activate
           pip install -r requirements.txt
           python manage.py test taskManager
-
-  nuclei-scan:
+          
+  terrascan:
     runs-on: ubuntu-20.04
-    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          ref: main
 
-      - name: Nuclei - Vulnerability Scan
-        uses: projectdiscovery/nuclei-action@main
+      - name: Run Terrascan
+        id: terrascan
+        uses: accurics/terrascan-action@v1
         with:
-          target: ${{ secrets.PROD_URL }}
-        continue-on-error: true
-
-      - name: GitHub Workflow artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: nuclei.log
-          path: nuclei.log    
+          iac_type: 'terraform'
+          iac_version: 'v14'
+          policy_type: 'aws'
+          only_warn: true
+          iac_dir: 'aws'
           
 
   integration:
     runs-on: ubuntu-20.04
-    needs: nuclei-scan
+    needs: terrascan
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
