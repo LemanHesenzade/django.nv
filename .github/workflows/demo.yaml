@@ -60,7 +60,7 @@ jobs:
  
   sast:
     runs-on: ubuntu-20.04
-    needs: oast-frontend
+    needs: sonarqube
     steps:
       - uses: actions/checkout@v2
 
@@ -75,7 +75,6 @@ jobs:
 
   integration:
     runs-on: ubuntu-20.04
-    needs: oast-frontend
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
