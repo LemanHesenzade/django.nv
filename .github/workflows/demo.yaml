@@ -41,27 +41,23 @@ jobs:
           pip install -r requirements.txt
           python manage.py test taskManager
 
-  zap_baseline:
+  nuclei-scan:
     runs-on: ubuntu-20.04
     needs: test
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: main
+      - run: |
+           docker run --user $(id -u):$(id -g) -w /nuclei -v $(pwd):/nuclei:rw --rm projectdiscovery/nuclei:v2.9.1 -u https://prod-o90ptg1x.lab.practical-devsecops.training -j -o nuclei-output.json
 
-      - name: ZAP Scan
-        uses: zaproxy/action-baseline@v0.4.0
+      - uses: actions/upload-artifact@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable:2.10.0'
-          target: ${{ secrets.PROD_URL }}
-        continue-on-error: true
+          name: nuclei scan
+          path: nuclei-output.json
+        if: always()        # what is this for?
  
 
   integration:
     runs-on: ubuntu-20.04
-    needs: zap_baseline
+    needs: nuclei-scan
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
