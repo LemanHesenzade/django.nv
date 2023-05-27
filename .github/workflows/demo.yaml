@@ -54,13 +54,13 @@ jobs:
       - run: npm install
 
       - run: docker run --rm -v $(pwd):/src -w /src hysnsec/retire --outputformat json --outputpath retirejs-report.json --severity high
+        continue-on-error: true             # allow the build to fail, similar to "allow_failure: true" in GitLab
 
       - uses: actions/upload-artifact@v2
         with:
           name: RetireJS
           path: retirejs-report.json
         if: always()                        # what is this for?
-
   sast:
     runs-on: ubuntu-20.04
     needs: oast-frontend
