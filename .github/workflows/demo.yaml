@@ -54,8 +54,11 @@ jobs:
         with:
           name: Bandit
           path: bandit-output.json
-
-
+        if: always()
+  dojo:
+    runs-on: ubuntu-20.04
+    needs: sast
+    steps:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.6'
@@ -64,7 +67,7 @@ jobs:
         
   integration:
     runs-on: ubuntu-20.04
-    needs: sast
+    needs: dojo
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
